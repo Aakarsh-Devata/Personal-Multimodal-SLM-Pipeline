@@ -1,0 +1,48 @@
+# Data (exclude all video data)
+phone_videos/
+slm_pipeline/models/
+*.mp4
+*.mov
+*.wav
+*.json
+!processed_meta.json
+!slm_pipeline/**/*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log

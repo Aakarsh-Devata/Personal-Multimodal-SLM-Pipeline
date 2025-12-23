@@ -1,0 +1,43 @@
+paths:
+  raw_dir: "/Users/aakarsh/Desktop/ProjectRoot/phone_videos/raw"
+  processed_dir: "/Users/aakarsh/Desktop/ProjectRoot/phone_videos/processed"
+  embeddings_dir: "/Users/aakarsh/Desktop/ProjectRoot/slm_pipeline/embeddings"
+  memory_dir: "/Users/aakarsh/Desktop/ProjectRoot/slm_pipeline/memory"
+
+models:
+  vision:
+    name: "Salesforce/blip2-opt-2.7b"
+    device: "cpu"
+    batch_size: 4
+  
+  embeddings:
+    name: "sentence-transformers/all-MiniLM-L6-v2"
+    device: "cpu"
+  
+  slm:
+    name: "mistral"
+    backend: "ollama"
+    temperature: 0.7
+    max_tokens: 2000
+  
+  semantic_extraction:
+    provider: "ollama"
+    model: "mistral"
+    temperature: 0.3
+    max_tokens: 1500
+
+pipeline:
+  frame_sampling_fps: 1
+  scene_threshold: 0.2
+  time_window_sec: 2.0
+  batch_size: 8
+  skip_existing: true
+  
+vector_db:
+  backend: "faiss"
+  index_type: "IndexFlatL2"
+  dimension: 384  # MiniLM embedding size
+  
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

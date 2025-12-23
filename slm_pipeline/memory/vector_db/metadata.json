@@ -1,0 +1,487 @@
+[
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0000",
+    "time_range": [
+      0.0,
+      6.08
+    ],
+    "speech_text": "Hi everyone, I'm at the Karshap. I recently joined consumer as a graduate analyst. My hobby is",
+    "visual_caption": "a woman in glasses sitting in an office",
+    "topics": [
+      "Introduction",
+      "Professional Development",
+      "Personal Interests"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "Informational",
+    "summary": "The woman introduced herself as a graduate analyst who recently joined Consumer at the Karshap office. She also mentioned her personal interest.",
+    "confidence": 0.9,
+    "searchable_text": "The woman introduced herself as a graduate analyst who recently joined Consumer at the Karshap office. She also mentioned her personal interest. | Topics: Introduction, Professional Development, Personal Interests | Entities: Karshap, Consumer, Graduate Analyst"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0001",
+    "time_range": [
+      6.08,
+      13.120000000000001
+    ],
+    "speech_text": "include going out to weekends with my friends and binge watching series and recently I have also",
+    "visual_caption": "",
+    "topics": [
+      "socializing",
+      "entertainment",
+      "recent activities"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "The speaker is discussing their recent social activities and entertainment, such as going out with friends on weekends and binge watching series.",
+    "confidence": 0.9,
+    "searchable_text": "The speaker is discussing their recent social activities and entertainment, such as going out with friends on weekends and binge watching series. | Topics: socializing, entertainment, recent activities | Entities: weekends, friends, series"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0002",
+    "time_range": [
+      13.120000000000001,
+      21.76
+    ],
+    "speech_text": "started swimming lessons. So I hope that goes well for me. A day in my life would look like me",
+    "visual_caption": "",
+    "topics": [
+      "swimming lessons"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "personal",
+    "summary": "The speaker is starting swimming lessons.",
+    "confidence": 0.9,
+    "searchable_text": "The speaker is starting swimming lessons. | Topics: swimming lessons | Entities: swimming lessons"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0003",
+    "time_range": [
+      21.76,
+      27.84
+    ],
+    "speech_text": "waking up early in the morning then taking a bike to office and getting stuck in traffic like always",
+    "visual_caption": "",
+    "topics": [
+      "waking up early",
+      "biking to office",
+      "traffic"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "informational",
+    "summary": "The speaker is discussing their morning routine of waking up early, biking to the office and getting stuck in traffic.",
+    "confidence": 0.85,
+    "searchable_text": "The speaker is discussing their morning routine of waking up early, biking to the office and getting stuck in traffic. | Topics: waking up early, biking to office, traffic | Entities: office, traffic"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0004",
+    "time_range": [
+      27.84,
+      32.72
+    ],
+    "speech_text": "and then I come here, he pricked us with my friends and then I log in trying to figure out all the",
+    "visual_caption": "",
+    "topics": [],
+    "decisions": [],
+    "tasks": [
+      "trying to figure out"
+    ],
+    "intent": "discussion",
+    "summary": "The speaker discusses something with 'he' and attempts to figure out something",
+    "confidence": 0.7,
+    "searchable_text": "The speaker discusses something with 'he' and attempts to figure out something | Tasks: trying to figure out"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0005",
+    "time_range": [
+      32.72,
+      40.4
+    ],
+    "speech_text": "processes and trying to learn more about the data sets and stuff and then my day sometimes ends",
+    "visual_caption": "",
+    "topics": [
+      "data sets",
+      "processes"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "Discussing data sets and processes",
+    "confidence": 0.8,
+    "searchable_text": "Discussing data sets and processes | Topics: data sets, processes"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0006",
+    "time_range": [
+      40.4,
+      48.16
+    ],
+    "speech_text": "with me watching the QPL and all the intense matches going on and finally I log off and then I go home and relax.",
+    "visual_caption": "",
+    "topics": [
+      "QPL matches",
+      "relaxation"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "personal",
+    "summary": "The speaker is discussing QPL matches and mentioning relaxation after logging off.",
+    "confidence": 0.85,
+    "searchable_text": "The speaker is discussing QPL matches and mentioning relaxation after logging off. | Topics: QPL matches, relaxation | Entities: QPL"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0000",
+    "time_range": [
+      0.0,
+      6.08
+    ],
+    "speech_text": "Hi everyone, I'm at the Karshap. I recently joined consumer as a graduate analyst. My hobby is",
+    "visual_caption": "a woman in glasses sitting in an office",
+    "topics": [
+      "Introduction",
+      "Professional Development",
+      "Personal Interests"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "Informational",
+    "summary": "The woman introduced herself as a graduate analyst who recently joined Consumer at the Karshap office. She also mentioned her personal interest.",
+    "confidence": 0.9,
+    "searchable_text": "The woman introduced herself as a graduate analyst who recently joined Consumer at the Karshap office. She also mentioned her personal interest. | Topics: Introduction, Professional Development, Personal Interests | Entities: Karshap, Consumer, Graduate Analyst"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0001",
+    "time_range": [
+      6.08,
+      13.120000000000001
+    ],
+    "speech_text": "include going out to weekends with my friends and binge watching series and recently I have also",
+    "visual_caption": "",
+    "topics": [
+      "socializing",
+      "entertainment",
+      "recent activities"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "The speaker is discussing their recent social activities and entertainment, such as going out with friends on weekends and binge watching series.",
+    "confidence": 0.9,
+    "searchable_text": "The speaker is discussing their recent social activities and entertainment, such as going out with friends on weekends and binge watching series. | Topics: socializing, entertainment, recent activities | Entities: weekends, friends, series"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0002",
+    "time_range": [
+      13.120000000000001,
+      21.76
+    ],
+    "speech_text": "started swimming lessons. So I hope that goes well for me. A day in my life would look like me",
+    "visual_caption": "",
+    "topics": [
+      "swimming lessons"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "personal",
+    "summary": "The speaker is starting swimming lessons.",
+    "confidence": 0.9,
+    "searchable_text": "The speaker is starting swimming lessons. | Topics: swimming lessons | Entities: swimming lessons"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0003",
+    "time_range": [
+      21.76,
+      27.84
+    ],
+    "speech_text": "waking up early in the morning then taking a bike to office and getting stuck in traffic like always",
+    "visual_caption": "",
+    "topics": [
+      "waking up early",
+      "biking to office",
+      "traffic"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "informational",
+    "summary": "The speaker is discussing their morning routine of waking up early, biking to the office and getting stuck in traffic.",
+    "confidence": 0.85,
+    "searchable_text": "The speaker is discussing their morning routine of waking up early, biking to the office and getting stuck in traffic. | Topics: waking up early, biking to office, traffic | Entities: office, traffic"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0004",
+    "time_range": [
+      27.84,
+      32.72
+    ],
+    "speech_text": "and then I come here, he pricked us with my friends and then I log in trying to figure out all the",
+    "visual_caption": "",
+    "topics": [],
+    "decisions": [],
+    "tasks": [
+      "trying to figure out"
+    ],
+    "intent": "discussion",
+    "summary": "The speaker discusses something with 'he' and attempts to figure out something",
+    "confidence": 0.7,
+    "searchable_text": "The speaker discusses something with 'he' and attempts to figure out something | Tasks: trying to figure out"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0005",
+    "time_range": [
+      32.72,
+      40.4
+    ],
+    "speech_text": "processes and trying to learn more about the data sets and stuff and then my day sometimes ends",
+    "visual_caption": "",
+    "topics": [
+      "data sets",
+      "processes"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "Discussing data sets and processes",
+    "confidence": 0.8,
+    "searchable_text": "Discussing data sets and processes | Topics: data sets, processes"
+  },
+  {
+    "video_id": "20251025_addya_interview",
+    "block_id": "ctx_0006",
+    "time_range": [
+      40.4,
+      48.16
+    ],
+    "speech_text": "with me watching the QPL and all the intense matches going on and finally I log off and then I go home and relax.",
+    "visual_caption": "",
+    "topics": [
+      "QPL matches",
+      "relaxation"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "personal",
+    "summary": "The speaker is discussing QPL matches and mentioning relaxation after logging off.",
+    "confidence": 0.85,
+    "searchable_text": "The speaker is discussing QPL matches and mentioning relaxation after logging off. | Topics: QPL matches, relaxation | Entities: QPL"
+  },
+  {
+    "video_id": "test_video_2",
+    "block_id": "ctx_0000",
+    "time_range": [
+      0.0,
+      5.76
+    ],
+    "speech_text": "Hi, I'm Akar Shadevata and I'm applying for the MCTS program at CMU.",
+    "visual_caption": "a man in a blue shirt is smiling for the camera",
+    "topics": [
+      "MCTS program application",
+      "CMU"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "informational",
+    "summary": "The individual, Akar Shadevata, is sharing information about applying for the MCTS program at CMU.",
+    "confidence": 0.95,
+    "searchable_text": "The individual, Akar Shadevata, is sharing information about applying for the MCTS program at CMU. | Topics: MCTS program application, CMU | Entities: MCTS program, CMU"
+  },
+  {
+    "video_id": "test_video_2",
+    "block_id": "ctx_0001",
+    "time_range": [
+      5.76,
+      10.32
+    ],
+    "speech_text": "This is my introduction video and I'm recording it from my office in Hyderabad, India, where",
+    "visual_caption": "a young man in a blue shirt sitting at a desk",
+    "topics": [
+      "Introduction",
+      "Location"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "Informational",
+    "summary": "The video is an introduction by a young man sitting in his office in Hyderabad, India.",
+    "confidence": 0.9,
+    "searchable_text": "The video is an introduction by a young man sitting in his office in Hyderabad, India. | Topics: Introduction, Location | Entities: Office in Hyderabad, India, Blue Shirt, Desk"
+  },
+  {
+    "video_id": "test_video_2",
+    "block_id": "ctx_0002",
+    "time_range": [
+      10.32,
+      13.8
+    ],
+    "speech_text": "I'm working as a data scientist at an AI company.",
+    "visual_caption": "a young man in a blue shirt sitting at a desk",
+    "topics": [
+      "Data Science",
+      "AI",
+      "Work"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "Informational",
+    "summary": "The speaker is discussing their occupation as a data scientist at an AI company.",
+    "confidence": 0.95,
+    "searchable_text": "The speaker is discussing their occupation as a data scientist at an AI company. | Topics: Data Science, AI, Work | Entities: Data Scientist, AI Company, Desk"
+  },
+  {
+    "video_id": "test_video_2",
+    "block_id": "ctx_0003",
+    "time_range": [
+      13.8,
+      18.2
+    ],
+    "speech_text": "I grew up in a village in India where contradictions were part of everyday life.",
+    "visual_caption": "a young man in a blue shirt sitting at a desk",
+    "topics": [
+      "upbringing",
+      "India",
+      "contradictions"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "Discusses growing up in a contradictory village in India",
+    "confidence": 0.85,
+    "searchable_text": "Discusses growing up in a contradictory village in India | Topics: upbringing, India, contradictions | Entities: young man, village in India, blue shirt, desk"
+  },
+  {
+    "video_id": "test_video_2",
+    "block_id": "ctx_0004",
+    "time_range": [
+      18.2,
+      23.52
+    ],
+    "speech_text": "Farmers had no electricity for irrigation, yet everyone watched YouTube on smartphones.",
+    "visual_caption": "a young man in a blue shirt sitting at a desk",
+    "topics": [
+      "Farmers without electricity for irrigation",
+      "YouTube on smartphones"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "Discusses the contrast between farmers lacking electricity for irrigation and everyone having access to YouTube on smartphones.",
+    "confidence": 0.85,
+    "searchable_text": "Discusses the contrast between farmers lacking electricity for irrigation and everyone having access to YouTube on smartphones. | Topics: Farmers without electricity for irrigation, YouTube on smartphones | Entities: electricity, irrigation, YouTube, smartphones"
+  },
+  {
+    "video_id": "test_video_2",
+    "block_id": "ctx_0005",
+    "time_range": [
+      23.52,
+      27.96
+    ],
+    "speech_text": "Seeing that contrast made me realize early on that technology is in just a convenience.",
+    "visual_caption": "",
+    "topics": [
+      "technology",
+      "convenience"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "The speaker discusses technology as a convenience.",
+    "confidence": 0.9,
+    "searchable_text": "The speaker discusses technology as a convenience. | Topics: technology, convenience | Entities: technology, convenience"
+  },
+  {
+    "video_id": "test_video_2",
+    "block_id": "ctx_0006",
+    "time_range": [
+      27.96,
+      31.16
+    ],
+    "speech_text": "It can determine who has access to opportunity.",
+    "visual_caption": "",
+    "topics": [
+      "access",
+      "opportunity"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "Discussing who can access opportunity.",
+    "confidence": 0.9,
+    "searchable_text": "Discussing who can access opportunity. | Topics: access, opportunity | Entities: opportunity, access"
+  },
+  {
+    "video_id": "test_video_2",
+    "block_id": "ctx_0007",
+    "time_range": [
+      31.16,
+      36.04
+    ],
+    "speech_text": "In my own family, education and technology were what opened doors and that shaped not",
+    "visual_caption": "",
+    "topics": [
+      "education",
+      "technology",
+      "family"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "The discussion revolves around the role of education and technology in shaping the speaker's family",
+    "confidence": 0.85,
+    "searchable_text": "The discussion revolves around the role of education and technology in shaping the speaker's family | Topics: education, technology, family | Entities: education, technology"
+  },
+  {
+    "video_id": "test_video_2",
+    "block_id": "ctx_0008",
+    "time_range": [
+      36.04,
+      40.0
+    ],
+    "speech_text": "just what I wanted to study but why it mattered to me.",
+    "visual_caption": "",
+    "topics": [
+      "study",
+      "personal interests"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "Discussing a personal topic of study",
+    "confidence": 0.75,
+    "searchable_text": "Discussing a personal topic of study | Topics: study, personal interests"
+  },
+  {
+    "video_id": "test_video_2",
+    "block_id": "ctx_0009",
+    "time_range": [
+      40.0,
+      42.36
+    ],
+    "speech_text": "That perspective deepened during my time at Rishi Vandhi.",
+    "visual_caption": "",
+    "topics": [
+      "perspective",
+      "time at Rishi Vandhi"
+    ],
+    "decisions": [],
+    "tasks": [],
+    "intent": "discussion",
+    "summary": "The discussion revolved around the deepening of a perspective during the time spent at Rishi Vandhi.",
+    "confidence": 0.85,
+    "searchable_text": "The discussion revolved around the deepening of a perspective during the time spent at Rishi Vandhi. | Topics: perspective, time at Rishi Vandhi | Entities: Rishi Vandhi"
+  }
+]
