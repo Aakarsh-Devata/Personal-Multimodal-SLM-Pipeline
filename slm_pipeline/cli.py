@@ -9,14 +9,12 @@ import argparse
 from pathlib import Path
 import json
 
-sys.path.insert(0, str(Path(__file__).parent))
-from config import config
-from agents.memory_agent import MemoryAgent
-from agents.summary_agent import SummaryAgent
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 
 def query_command(args):
     """Handle query command."""
+    from slm_pipeline.agents.memory_agent import MemoryAgent
     agent = MemoryAgent()
     results = agent.search_memory(args.query, k=args.limit, video_id=args.video)
     
@@ -28,17 +26,19 @@ def query_command(args):
         print(f"    Time: {result.get('time_range', [0, 0])[0]:.1f}s - {result.get('time_range', [0, 0])[1]:.1f}s")
         print(f"    Speech: {result.get('speech_text', '')[:200]}")
         print(f"    Visual: {result.get('visual_caption', '')}")
+        print(f"    Evidence status: {result.get('verification_status', 'unvalidated_or_unknown')}")
         if result.get('topics'):
             print(f"    Topics: {', '.join(result.get('topics', []))}")
         if result.get('decisions'):
             print(f"    Decisions: {', '.join(result.get('decisions', []))}")
-        print(f"    Similarity: {result.get('similarity', 0):.3f}")
+        print(f"    Retrieval distance (ranking only): {result.get('distance', result.get('similarity', 0)):.3f}")
     
     print("\n" + "=" * 80)
 
 
 def summarize_command(args):
     """Handle summarize command."""
+    from slm_pipeline.agents.summary_agent import SummaryAgent
     agent = SummaryAgent()
     
     if args.meeting:
@@ -72,6 +72,7 @@ def summarize_command(args):
 
 def tasks_command(args):
     """Handle tasks command."""
+    from slm_pipeline.agents.memory_agent import MemoryAgent
     agent = MemoryAgent()
     tasks = agent.get_all_tasks()
     
@@ -89,6 +90,7 @@ def tasks_command(args):
 
 def decisions_command(args):
     """Handle decisions command."""
+    from slm_pipeline.agents.memory_agent import MemoryAgent
     agent = MemoryAgent()
     decisions = agent.get_all_decisions()
     
@@ -106,6 +108,7 @@ def decisions_command(args):
 
 def topics_command(args):
     """Handle topics command."""
+    from slm_pipeline.agents.memory_agent import MemoryAgent
     agent = MemoryAgent()
     topics = agent.get_topics(k=args.limit)
     
@@ -116,6 +119,50 @@ def topics_command(args):
         print(f"{i}. {topic}")
     
     print("\n" + "=" * 80)
+
+
+def visual_search_command(args):
+    """Search Phase 4 captions without claiming an ASR or semantic answer."""
+    from slm_pipeline.pipelines.vision_retrieval import CaptionOnlyRetriever
+    retriever = CaptionOnlyRetriever()
+    results = retriever.search(args.query, video_id=args.video, limit=args.limit)
+    print(f"\nCaption-only model observations for: '{args.query}'\n")
+    print("No ASR or semantic answer was generated; retrieved text is unvalidated model evidence.")
+    print("=" * 80)
+    for index, result in enumerate(results, 1):
+        timestamp = result.get("frame_timestamp_sec", 0.0)
+        print(f"\n[{index}] Video: {result.get('video_id')} at {timestamp:.3f}s")
+        print(f"    Observation: {result.get('observation', '')}")
+        print(f"    Retrieval distance: {result.get('distance', 0):.3f}")
+    print("\n" + "=" * 80)
+
+
+def visual_index_command(args):
+    """Index Phase 4 model captions only; no ASR, semantic, or labels input."""
+    from slm_pipeline.pipelines.vision_retrieval import CaptionOnlyRetriever
+    count = CaptionOnlyRetriever().index_caption_file(args.captions)
+    print(f"Indexed {count} timestamped model observations (caption-only retrieval).")
+
+
+def ask_command(args):
+    """Ask the local evidence layer without generating an ungrounded answer."""
+    from slm_pipeline.pipelines.evidence_query import EvidenceQueryService
+    from slm_pipeline.pipelines.vision_retrieval import CaptionOnlyRetriever
+
+    result = EvidenceQueryService(CaptionOnlyRetriever()).ask(
+        args.question, video_id=args.video, limit=args.limit,
+        start_sec=args.start_sec, end_sec=args.end_sec,
+    )
+    print(f"\nAnswer status: {result['answer_status']}")
+    print(result['answer'])
+    print("\nTimestamped evidence cards (distance ranks retrieval only; not confidence):")
+    for index, card in enumerate(result['evidence_cards'], 1):
+        interval = card['source_time_range_sec']
+        time_text = "unavailable" if interval is None else f"{interval[0]:.3f}s – {interval[1]:.3f}s"
+        print(f"\n[{index}] {card.get('video_id')} at {time_text}")
+        print(f"    Observation: {card.get('observation', '')}")
+        print(f"    Evidence status: {card.get('verification_status')}; accepted: {card.get('accepted_as_fact')}")
+        print(f"    Retrieval distance (ranking only): {card.get('retrieval_distance_ranking_only')}")
 
 
 def main():
@@ -148,6 +195,21 @@ def main():
     # Topics command
     topics_parser = subparsers.add_parser('topics', help='List common topics')
     topics_parser.add_argument('--limit', type=int, default=20, help='Number of topics to show')
+
+    visual_parser = subparsers.add_parser('visual-search', help='Search timestamped model captions only')
+    visual_parser.add_argument('query', type=str, help='Text to retrieve against model observations')
+    visual_parser.add_argument('--limit', type=int, default=5, help='Number of observations')
+    visual_parser.add_argument('--video', type=str, help='Filter observations by video ID')
+
+    visual_index_parser = subparsers.add_parser('visual-index', help='Index Phase 4 model captions only')
+    visual_index_parser.add_argument('--captions', required=True, help='Phase 4 vision_captions.json path')
+
+    ask_parser = subparsers.add_parser('ask', help='Retrieve timestamped evidence with a fail-closed answer status')
+    ask_parser.add_argument('question', type=str, help='Question to retrieve against local observations')
+    ask_parser.add_argument('--limit', type=int, default=5, help='Number of evidence cards (1-10)')
+    ask_parser.add_argument('--video', type=str, help='Filter evidence cards by source video ID')
+    ask_parser.add_argument('--start-sec', type=float, help='Optional inclusive source-time start; requires --end-sec')
+    ask_parser.add_argument('--end-sec', type=float, help='Optional inclusive source-time end; requires --start-sec')
     
     args = parser.parse_args()
     
@@ -166,6 +228,12 @@ def main():
         decisions_command(args)
     elif args.command == 'topics':
         topics_command(args)
+    elif args.command == 'visual-search':
+        visual_search_command(args)
+    elif args.command == 'visual-index':
+        visual_index_command(args)
+    elif args.command == 'ask':
+        ask_command(args)
 
 
 if __name__ == "__main__":

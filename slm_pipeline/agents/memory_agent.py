@@ -2,28 +2,28 @@
 
 import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
-import json
+from typing import List, Dict, Optional
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from config import config
-from agents.base_agent import BaseAgent
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-# Import vector store components
-sys.path.insert(0, str(Path(__file__).parent.parent / "pipelines"))
-from phase_7_embed import EmbeddingGenerator, VectorStore
+from slm_pipeline.agents.base_agent import BaseAgent
+from slm_pipeline.pipelines.phase_7_embed import EmbeddingGenerator, VectorStore
 
 
 class MemoryAgent(BaseAgent):
     """Agent for searching and retrieving memories."""
     
-    def __init__(self):
+    def __init__(self, embedder=None, vector_store=None):
         super().__init__("MemoryAgent")
         
         # Load embedding model and vector store
-        self.embedder = EmbeddingGenerator()
-        self.vector_store = VectorStore(dimension=self.embedder.dimension)
+        self.embedder = embedder if embedder is not None else EmbeddingGenerator()
+        self.vector_store = vector_store if vector_store is not None else VectorStore(
+            dimension=self.embedder.dimension
+        )
+        if self.embedder.dimension != self.vector_store.dimension:
+            raise ValueError("Embedder and vector store dimensions must match")
         
         self.log(f"Loaded vector store with {self.vector_store.index.ntotal} memories")
     
@@ -39,7 +39,7 @@ class MemoryAgent(BaseAgent):
         Args:
             query: Natural language search query
             k: Number of results to return
-            time_range: Optional (start_time, end_time) tuple to filter results
+            time_range: Optional inclusive overlap (start_seconds, end_seconds)
             video_id: Optional video_id to filter results
         
         Returns:
@@ -50,32 +50,13 @@ class MemoryAgent(BaseAgent):
         # Generate query embedding
         query_embedding = self.embedder.encode_single(query)
         
-        # Search vector store - fetch more if filtering
-        search_k = k * 5 if (time_range or video_id) else k
-        results = self.vector_store.search(query_embedding, k=search_k)
-        
-        # Apply filters
-        filtered_results = []
-        for result in results:
-            # Filter by video_id
-            if video_id and result.get('video_id') != video_id:
-                continue
-                
-            # Filter by time range
-            if time_range:
-                # Placeholder for time check logic
-                pass
-                
-            filtered_results.append(result)
-            if len(filtered_results) >= k:
-                break
-                
-        self.log(f"Found {len(filtered_results)} results after filtering")
-        return filtered_results
-        
+        # Filter before ranking so every requested eligible neighbor is considered.
+        results = self.vector_store.search(
+            query_embedding, k=k, video_id=video_id, time_range=time_range
+        )
         self.log(f"Found {len(results)} results")
         return results
-    
+
     def get_event(self, video_id: str, block_id: str) -> Optional[Dict]:
         """Retrieve a specific event by video and block ID."""
         self.log(f"Retrieving event: {video_id}/{block_id}")
@@ -112,6 +93,8 @@ class MemoryAgent(BaseAgent):
         
         topic_counts = {}
         for meta in self.vector_store.metadata:
+            if meta.get('accepted_as_fact') is not True:
+                continue
             for topic in meta.get('topics', []):
                 topic_counts[topic] = topic_counts.get(topic, 0) + 1
         
@@ -130,6 +113,8 @@ class MemoryAgent(BaseAgent):
         
         decisions = []
         for meta in self.vector_store.metadata:
+            if meta.get('accepted_as_fact') is not True:
+                continue
             for decision in meta.get('decisions', []):
                 decisions.append({
                     'decision': decision,
@@ -148,6 +133,8 @@ class MemoryAgent(BaseAgent):
         
         tasks = []
         for meta in self.vector_store.metadata:
+            if meta.get('accepted_as_fact') is not True:
+                continue
             for task in meta.get('tasks', []):
                 tasks.append({
                     'task': task,

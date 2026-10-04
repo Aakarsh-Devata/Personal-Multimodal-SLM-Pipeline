@@ -1,0 +1,10 @@
+# Optional CPU ASR backend; no torch, torchvision, BLIP, or downloaded weights.
+# Install into a virtual environment: python -m pip install -r requirements-asr.txt
+faster-whisper==1.2.1
+PyYAML==6.0.3
+ctranslate2==4.8.2
+onnxruntime==1.30.0
+tokenizers==0.23.2
+huggingface-hub==1.33.0
+# faster-whisper 1.2.1 passes metadata_errors, which PyAV 19 removed.
+av==18.1.0

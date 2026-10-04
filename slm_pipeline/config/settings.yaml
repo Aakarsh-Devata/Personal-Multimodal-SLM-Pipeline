@@ -1,14 +1,22 @@
 paths:
-  raw_dir: "/Users/aakarsh/Desktop/ProjectRoot/phone_videos/raw"
-  processed_dir: "/Users/aakarsh/Desktop/ProjectRoot/phone_videos/processed"
-  embeddings_dir: "/Users/aakarsh/Desktop/ProjectRoot/slm_pipeline/embeddings"
-  memory_dir: "/Users/aakarsh/Desktop/ProjectRoot/slm_pipeline/memory"
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  embeddings_dir: "data/embeddings"
+  memory_dir: "data/memory"
 
 models:
-  vision:
-    name: "Salesforce/blip2-opt-2.7b"
+  whisper:
+    backend: "whisper"
+    name: "base"
     device: "cpu"
-    batch_size: 4
+  vision:
+    # A small local frame-observation model.  It is loaded only in phase 4 and
+    # only from the local cache unless SLM_ALLOW_DOWNLOADS=1 is set explicitly.
+    backend: "smolvlm2"
+    name: "HuggingFaceTB/SmolVLM2-256M-Video-Instruct"
+    device: "auto"
+    batch_size: 1
+    max_new_tokens: 64
   
   embeddings:
     name: "sentence-transformers/all-MiniLM-L6-v2"
@@ -17,13 +25,13 @@ models:
   slm:
     name: "mistral"
     backend: "ollama"
-    temperature: 0.7
+    temperature: 0.0
     max_tokens: 2000
   
   semantic_extraction:
     provider: "ollama"
     model: "mistral"
-    temperature: 0.3
+    temperature: 0.0
     max_tokens: 1500
 
 pipeline:
@@ -31,7 +39,8 @@ pipeline:
   scene_threshold: 0.2
   time_window_sec: 2.0
   batch_size: 8
-  skip_existing: true
+  skip_existing: false
+  allow_model_downloads: false
   
 vector_db:
   backend: "faiss"

@@ -6,12 +6,12 @@ from typing import List, Dict, Any, Optional
 import json
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from config import config
-from agents.base_agent import BaseAgent
+from slm_pipeline.config import config
+from slm_pipeline.agents.base_agent import BaseAgent
 
 # Import Ollama client
 sys.path.insert(0, str(Path(__file__).parent.parent / "pipelines"))
-from phase_6_semantic import OllamaClient
+from slm_pipeline.pipelines.phase_6_semantic import OllamaClient
 
 
 class SummaryAgent(BaseAgent):
@@ -52,8 +52,12 @@ class SummaryAgent(BaseAgent):
         all_decisions = []
         all_tasks = []
         all_text = []
+        unvalidated_blocks = 0
         
         for block in semantic_data.get('semantic_blocks', []):
+            if block.get('accepted_as_fact') is not True:
+                unvalidated_blocks += 1
+                continue
             all_topics.update(block.get('topics', []))
             all_decisions.extend(block.get('decisions', []))
             all_tasks.extend(block.get('tasks', []))
@@ -85,7 +89,8 @@ Provide a concise 3-4 sentence summary of this meeting, highlighting key points,
             "topics": list(all_topics),
             "decisions": all_decisions,
             "tasks": all_tasks,
-            "duration_blocks": len(semantic_data.get('semantic_blocks', []))
+            "duration_blocks": len(semantic_data.get('semantic_blocks', [])),
+            "unvalidated_semantic_blocks_excluded": unvalidated_blocks,
         }
     
     def summarize_all_videos(self) -> Dict:

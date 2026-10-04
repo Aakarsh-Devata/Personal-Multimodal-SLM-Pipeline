@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 import logging
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from config import config
+from slm_pipeline.config import config
 
 logging.basicConfig(
     level=config['logging']['level'],

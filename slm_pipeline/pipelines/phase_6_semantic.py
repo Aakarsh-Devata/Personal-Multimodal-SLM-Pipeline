@@ -11,8 +11,9 @@ from typing import List, Dict, Any
 import logging
 import requests
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from config import config
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from slm_pipeline.config import config
+from slm_pipeline.runtime import selected_video_dirs, phase_cli
 
 logging.basicConfig(
     level=config['logging']['level'],
@@ -36,14 +37,14 @@ class OllamaClient:
     def _test_connection(self):
         """Test if Ollama is running."""
         try:
-            response = requests.get(f"{self.base_url}/api/tags")
+            response = requests.get(f"{self.base_url}/api/tags", timeout=5)
             if response.status_code == 200:
                 logger.info("✅ Connected to Ollama")
             else:
-                logger.warning("⚠️ Ollama connection issue")
+                response.raise_for_status()
         except Exception as e:
             logger.error(f"❌ Cannot connect to Ollama: {e}")
-            logger.error("Please ensure Ollama is running: ollama serve")
+            raise ConnectionError("Ollama is unavailable; start the configured local server") from e
     
     def generate(self, prompt: str) -> str:
         """Generate text using Ollama."""
@@ -66,10 +67,10 @@ class OllamaClient:
                 return response.json().get('response', '')
             else:
                 logger.error(f"Ollama error: {response.status_code}")
-                return ""
+                response.raise_for_status()
         except Exception as e:
             logger.error(f"Generation error: {e}")
-            return ""
+            raise RuntimeError("Ollama generation failed") from e
 
 
 class SemanticExtractor:
@@ -86,6 +87,11 @@ class SemanticExtractor:
         visual_caption = context_block.get('visual', {}).get('caption', '')
         
         prompt = f"""Analyze the following multimodal context and extract structured information.
+
+Visual text in this context is an unvalidated model hypothesis, not a fact. Do not
+promote a visual action, object, or temporal change to a decision/task/fact unless
+the speech explicitly establishes it. Preserve uncertainty rather than completing
+missing visual events.
 
 Speech: "{speech_text}"
 Visual Context: "{visual_caption}"
@@ -124,22 +130,25 @@ JSON:"""
             
             # Validate required fields
             required_fields = ['topics', 'decisions', 'tasks', 'people', 'entities', 'intent', 'summary', 'confidence']
-            for field in required_fields:
-                if field not in data:
-                    data[field] = [] if field != 'intent' and field != 'summary' and field != 'confidence' else (
-                        'informational' if field == 'intent' else (
-                            '' if field == 'summary' else 0.5
-                        )
-                    )
-            
+            if not isinstance(data, dict) or any(field not in data for field in required_fields):
+                raise ValueError("Structured model output is missing required fields")
+            # Generated content may not supply authoritative evidence IDs/times.
+            data = {field: data[field] for field in required_fields}
+            for field in ('topics', 'decisions', 'tasks', 'people', 'entities'):
+                if not isinstance(data[field], list) or not all(isinstance(value, str) for value in data[field]):
+                    raise ValueError(f"Invalid semantic field: {field}")
+            if not isinstance(data['summary'], str) or not data['summary'].strip() or isinstance(data['confidence'], bool) or not isinstance(data['confidence'], (int, float)) or not 0 <= data['confidence'] <= 1:
+                raise ValueError("Invalid semantic summary/confidence")
+            if data['intent'] not in {'informational', 'planning', 'discussion', 'action', 'personal'}:
+                raise ValueError("Invalid semantic intent")
             return data
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON: {e}")
             logger.debug(f"Response was: {response[:200]}")
-            return self._get_fallback_structure()
+            raise ValueError("Invalid structured model output") from e
         except Exception as e:
             logger.error(f"Error parsing response: {e}")
-            return self._get_fallback_structure()
+            raise ValueError("Invalid structured model output") from e
     
     def _get_fallback_structure(self) -> Dict:
         """Return fallback structure if parsing fails."""
@@ -160,7 +169,7 @@ JSON:"""
         response = self.llm.generate(prompt)
         
         if not response:
-            return self._get_fallback_structure()
+            raise ValueError("Empty structured model output")
         
         return self.parse_llm_response(response)
     
@@ -171,8 +180,7 @@ JSON:"""
         # Load context blocks
         context_file = video_dir / "context_blocks.json"
         if not context_file.exists():
-            logger.warning(f"No context blocks found for {video_dir.name}")
-            return
+            raise FileNotFoundError(f"No context blocks found for {video_dir.name}")
         
         # Output file
         output_file = video_dir / "semantic_structure.json"
@@ -195,9 +203,12 @@ JSON:"""
             semantic_info = self.extract_semantic_info(block)
             
             result = {
-                "context_block_id": block.get('block_id'),
-                "time_range": block.get('time_range'),
-                **semantic_info
+                **semantic_info,
+                "context_block_id": block['block_id'],
+                "time_range": block['time_range'],
+                "verification_status": "unvalidated_derived_model_hypothesis",
+                "accepted_as_fact": False,
+                "visual_evidence_status": block.get('visual', {}).get('verification_status', 'no_visual_observation'),
             }
             
             semantic_data.append(result)
@@ -216,30 +227,12 @@ JSON:"""
         logger.info(f"Saved to {output_file}")
 
 
-def main():
-    """Main entry point."""
-    processed_dir = Path(config['paths']['processed_dir'])
-    
-    if not processed_dir.exists():
-        logger.error(f"Processed directory not found: {processed_dir}")
-        return
-    
-    # Initialize extractor
+def main(video_id=None):
+    folders = selected_video_dirs(config, video_id)
     extractor = SemanticExtractor()
-    
-    # Process all video folders
-    video_folders = [d for d in processed_dir.iterdir() if d.is_dir()]
-    logger.info(f"Found {len(video_folders)} video folders to process")
-    
-    for video_dir in video_folders:
-        try:
-            extractor.process_video_folder(video_dir)
-        except Exception as e:
-            logger.error(f"Failed to process {video_dir.name}: {e}")
-            continue
-    
-    logger.info("🎉 Phase 6 (Semantic Structuring) completed!")
+    for video_dir in folders:
+        extractor.process_video_folder(video_dir)
 
 
 if __name__ == "__main__":
-    main()
+    phase_cli(main)

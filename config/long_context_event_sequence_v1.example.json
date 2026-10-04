@@ -1,0 +1,32 @@
+{
+  "status": "design_only_no_model_run",
+  "purpose": "Primary-system evaluation design for a 20–30 second public video with global context plus local temporal bursts. It must not spread 16 frames across the full duration and call the result dense temporal evidence.",
+  "source_requirements": {
+    "official_public_source_and_license_verified": true,
+    "duration_sec": {"minimum": 20, "maximum": 30},
+    "size_bytes_maximum": 157286400,
+    "selection": "Inspect source video without opening action labels. Freeze a human-observable action sequence and its before/after context before inference. If labels for a candidate were previously opened, it is development-only and cannot be called held out."
+  },
+  "input_plan": {
+    "global_overview": {"frame_count": 16, "sampling": "uniform across full source duration", "purpose": "context and candidate localization only"},
+    "local_windows": {
+      "window_count": "2 to 4 overlapping windows",
+      "duration_sec_each": {"minimum": 2, "maximum": 4},
+      "sampling_fps": {"minimum": 4, "maximum": 8},
+      "purpose": "temporally observable actions; each window must retain ordered exact source PTS and no repeated decoded frame"
+    },
+    "views": "Full frame is required. A hand-object crop is optional only as an additional separately logged view after source inspection establishes the same contact/motion; it must never replace global context."
+  },
+  "frozen_pre_inference_checks": [
+    "Archive global and local exact-native-input contact sheets for human review.",
+    "Record decoder frame hashes, source PTS, ordering, native tensor shape/grid, token budget, processor contract, and resource usage.",
+    "Prove unique dense local frames and preserve no-reuse checks.",
+    "Use the same frozen evidence prompt and model configuration for every planned presentation."
+  ],
+  "evaluation_after_outputs": {
+    "review_order": "First evaluate source-observable event sequence and order, abstention, schema failures, and unsupported visual claims. Only then open predeclared references if the source remains uncontaminated.",
+    "separate_metrics": ["global and local timestamp coverage", "human sampled-frame observability", "event-sequence/order support", "unsupported claims", "abstentions", "reference recognition with explicit denominators"],
+    "prohibitions": ["no retries to improve results", "no prompt/model tuning on the test", "no general accuracy claim from one source"]
+  },
+  "capability_gate": "If a prior dense source-observable diagnostic shows the installed model cannot support a directly visible transition, do not repeat that short diagnostic. A primary-system run needs explicit authorization and must be reported as system-context evidence, not as a rescue of the local action-recognition capability."
+}

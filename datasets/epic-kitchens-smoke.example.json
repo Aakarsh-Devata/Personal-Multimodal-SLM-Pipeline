@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "dataset_id": "epic-kitchens-100",
+  "dataset_version": "EK100 annotations with original EK55 video",
+  "purpose": "Noncommercial research smoke test; not a benchmark or commercial-use grant",
+  "records": [
+    {
+      "video_id": "P02_05",
+      "split": "train",
+      "source_url": "https://data.bris.ac.uk/datasets/3h91syskeag572hl6tvuovwv4d/videos/train/P02/P02_05.MP4",
+      "license_id": "CC-BY-NC-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "attribution": "EPIC-KITCHENS P02_05 by Dima Damen and the EPIC-KITCHENS contributors; original EK55 video used with EK100 annotations. Source: https://epic-kitchens.github.io/2025#download . No endorsement implied.",
+      "changes": "None; original media bytes retained. Any derived frames, audio or model outputs must document their own changes.",
+      "timestamp_unit": "seconds",
+      "timestamp_origin": "source_video_start",
+      "source_duration_seconds": 18.551867,
+      "clip_interval_seconds": [0, 18.551867],
+      "size_bytes": 70130936,
+      "sha256": "75bddc7634447d52502fd596ba4494d11fdb7a7e316d51035282c90a846c5efa",
+      "verification_status": "verified",
+      "verification_note": "Observed from the official HTTPS source on 2026-10-04; downstream callers must verify their own local bytes. Video stream duration is 18.551867 s; audio/container duration is 18.560000 s.",
+      "reference_annotations": [
+        {
+          "kind": "action",
+          "role": "evaluation_reference_only",
+          "source_url": "https://raw.githubusercontent.com/epic-kitchens/epic-kitchens-100-annotations/master/EPIC_100_train.csv",
+          "license_id": "CC-BY-NC-4.0",
+          "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+          "attribution": "EPIC-KITCHENS-100 annotations by Dima Damen and the EPIC-KITCHENS contributors; https://github.com/epic-kitchens/epic-kitchens-100-annotations . No endorsement implied.",
+          "sha256": "a3a7ef2e397bd8af12bd0496b09d61b1f2c1f3f6e1726fa86af50a27f4855e87"
+        },
+        {
+          "kind": "sound",
+          "role": "evaluation_reference_only",
+          "source_url": "https://raw.githubusercontent.com/epic-kitchens/epic-sounds-annotations/main/EPIC_Sounds_train.csv",
+          "license_id": "CC-BY-NC-4.0",
+          "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+          "attribution": "EPIC-SOUNDS annotations by Jaesung Huh, Jacob Chalk, Evangelos Kazakos, Dima Damen, Andrew Zisserman and contributors; https://github.com/epic-kitchens/epic-sounds-annotations . No endorsement implied.",
+          "sha256": "225427ab288cc5c72c1680abb29f5ab8ccd3608c3f4cf409541d2c5cf720dd32"
+        }
+      ]
+    }
+  ]
+}

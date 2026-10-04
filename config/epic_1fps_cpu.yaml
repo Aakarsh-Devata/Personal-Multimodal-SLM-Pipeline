@@ -1,0 +1,12 @@
+# Independent one-frame-per-second temporal-coverage comparison profile.
+paths:
+  raw_dir: "data/raw"
+  processed_dir: "data/experiments/onefps/processed"
+  memory_dir: "data/experiments/onefps/memory"
+  embeddings_dir: "data/experiments/onefps/embeddings"
+models:
+  vision:
+    device: "cpu"
+    max_new_tokens: 24
+pipeline:
+  frame_sampling_fps: 1.0

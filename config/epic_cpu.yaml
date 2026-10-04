@@ -1,0 +1,9 @@
+# Local one-clip smoke profile for an Apple Silicon host without available MPS.
+# Source timestamps remain those decoded by FFmpeg; this changes only sampling
+# density and generation length to keep the interactive CPU run bounded.
+models:
+  vision:
+    device: "cpu"
+    max_new_tokens: 24
+pipeline:
+  frame_sampling_fps: 0.25
