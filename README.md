@@ -3,9 +3,14 @@
 Local video → audio/frames → transcript/captions → timestamped context → structured semantics → searchable FAISS memory. The existing seven-stage design is retained; inference runs locally and does not use paid APIs.
 
 Current status: [paused reproducible checkpoint](docs/CURRENT_CHECKPOINT.md).
-The latest local macOS run passed 99 tests with 4 warnings. Real Qwen3-VL
+The final clean Linux cloud test run passed 130 tests with 3 third-party warnings.
+Earlier macOS counts and the native-runtime risk are recorded in that checkpoint.
+Real Qwen3-VL
 MLX/Metal inference runs, but action claims remain unreliable, including in the
 final longer-context experiment. This is not a production action-memory system.
+The later question interface also has a known
+[macOS native-runtime stability issue](docs/local-evidence-query.md#native-macos-stability-warning);
+the successful query after an import-order workaround is not a stability guarantee.
 
 ## First reproducible milestone
 
@@ -32,7 +37,7 @@ unvalidated until independently reviewed.
 
 ## Install and test
 
-The original lightweight milestone used Python 3.12, Linux x86_64, and FFmpeg/ffprobe 7.1. A later local macOS checkpoint passed the 99-test suite described above. Python 3.12 is recommended for the pinned wheel versions. FFmpeg must be installed separately via the system package manager. Verify that the pinned wheels install for the actual architecture, and select CPU/MPS/CUDA only after inspecting available hardware. The setup script does not assume CUDA or silently install a GPU stack.
+The original lightweight milestone used Python 3.12, Linux x86_64, and FFmpeg/ffprobe 7.1. The final 130-test checkpoint was installed and tested in a fresh Linux environment. Earlier macOS runs passed synthetic tests, but real MiniLM/FAISS attempts exposed the native-runtime stability issue linked above. Python 3.12 is recommended for the pinned wheel versions. FFmpeg must be installed separately via the system package manager. Verify that the pinned wheels install for the actual architecture, and select CPU/MPS/CUDA only after inspecting available hardware. The setup script does not assume CUDA or silently install a GPU stack.
 
 ```sh
 git clone https://github.com/Aakarsh-Devata/Personal-Multimodal-SLM-Pipeline.git
@@ -168,6 +173,16 @@ python -m slm_pipeline.cli visual-search "washing machine" --video P02_05
 ```
 
 Treat FAISS distance as a ranking signal only. Abstain when the available captions do not establish the requested fact, action, or time interval.
+
+## Local evidence question interface
+
+`slm_pipeline.cli ask` and the small local page at `/ask` provide a thin
+question-to-retrieval layer over the caption-only MiniLM/FAISS index. They show
+timestamped evidence cards and an explicit answer status; they are not
+generative video QA. Action or event questions with only model observations
+return `insufficient_evidence`, while retaining those observations as possible
+leads. The web process binds only to `127.0.0.1` and has no permissive CORS
+setting. See [local evidence-query usage and limits](docs/local-evidence-query.md).
 
 ## Uniform temporal comparison
 

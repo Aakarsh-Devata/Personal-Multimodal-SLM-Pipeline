@@ -1,0 +1,6 @@
+# Lightweight local API profile; tested on Python 3.12 (Linux).
+# No model packages or weights are included.
+fastapi==0.141.1
+starlette==1.6.0
+pydantic==2.13.4
+uvicorn==0.52.1

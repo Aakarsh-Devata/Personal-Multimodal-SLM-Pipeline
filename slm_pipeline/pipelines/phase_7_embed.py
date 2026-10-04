@@ -2,13 +2,13 @@
 """Phase 7: generate embeddings and replace each video's searchable memory."""
 
 import json
+import importlib
 import logging
 from numbers import Integral
 from pathlib import Path
 import sys
 from typing import Dict, List, Optional
 
-import faiss
 import numpy as np
 
 if __package__ in (None, ""):
@@ -22,6 +22,16 @@ logging.basicConfig(
     format=config['logging']['format'],
 )
 logger = logging.getLogger(__name__)
+
+
+def _faiss():
+    """Load FAISS only when a vector store is used.
+
+    On the tested Apple-Silicon environment this ordering matters: the local
+    MiniLM runtime must initialize before FAISS is imported in the same
+    process. The delayed import also preserves the module's light import path.
+    """
+    return importlib.import_module("faiss")
 
 
 class EmbeddingGenerator:
@@ -59,7 +69,7 @@ class VectorStore:
         if isinstance(dimension, bool) or not isinstance(dimension, Integral) or dimension <= 0:
             raise ValueError("Embedding dimension must be a positive integer")
         self.dimension = int(dimension)
-        self.index = faiss.IndexFlatL2(self.dimension)
+        self.index = _faiss().IndexFlatL2(self.dimension)
         self.metadata = []
         root = Path(memory_dir if memory_dir is not None else config['paths']['memory_dir'])
         self.index_path = root / "vector_db" / "faiss_index.bin"
@@ -110,7 +120,7 @@ class VectorStore:
             idx for idx, row in enumerate(self.metadata)
             if row.get('video_id') != video_id
         ]
-        replacement = faiss.IndexFlatL2(self.dimension)
+        replacement = _faiss().IndexFlatL2(self.dimension)
         if retained_ids:
             retained = np.asarray(
                 [self.index.reconstruct(idx) for idx in retained_ids], dtype=np.float32
@@ -166,7 +176,7 @@ class VectorStore:
 
         search_index = self.index
         if len(candidates) != self.index.ntotal:
-            search_index = faiss.IndexFlatL2(self.dimension)
+            search_index = _faiss().IndexFlatL2(self.dimension)
             search_index.add(np.asarray(
                 [self.index.reconstruct(idx) for idx in candidates], dtype=np.float32
             ))
@@ -187,14 +197,14 @@ class VectorStore:
         # Serialize before writing so malformed metadata cannot destroy the index.
         metadata_json = json.dumps(self.metadata, indent=2, ensure_ascii=False, allow_nan=False)
         self.index_path.parent.mkdir(parents=True, exist_ok=True)
-        faiss.write_index(self.index, str(self.index_path))
+        _faiss().write_index(self.index, str(self.index_path))
         self.metadata_path.write_text(metadata_json, encoding='utf-8')
         logger.info("Saved vector store (%d vectors)", self.index.ntotal)
 
     def load(self):
         if not self.index_path.exists() or not self.metadata_path.exists():
             raise FileNotFoundError("Vector store requires both faiss_index.bin and metadata.json")
-        index = faiss.read_index(str(self.index_path))
+        index = _faiss().read_index(str(self.index_path))
         metadata = json.loads(self.metadata_path.read_text(encoding='utf-8'))
         if index.d != self.dimension:
             raise ValueError(

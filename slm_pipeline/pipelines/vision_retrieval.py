@@ -77,9 +77,11 @@ class CaptionOnlyRetriever:
         with Path(path).open(encoding="utf-8") as stream:
             return self.index_caption_data(json.load(stream))
 
-    def search(self, query, *, video_id=None, limit=5):
+    def search(self, query, *, video_id=None, limit=5, time_range=None):
         if not isinstance(query, str) or not query.strip():
             raise ValueError("query must be nonempty text")
+        scope = {} if time_range is None else {"time_range": time_range}
         return self.vector_store.search(
-            self.embedder.encode_single(query.strip()), k=limit, video_id=video_id
+            self.embedder.encode_single(query.strip()), k=limit, video_id=video_id,
+            **scope,
         )

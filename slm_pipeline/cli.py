@@ -10,13 +10,11 @@ from pathlib import Path
 import json
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from slm_pipeline.config import config
-from slm_pipeline.agents.memory_agent import MemoryAgent
-from slm_pipeline.agents.summary_agent import SummaryAgent
 
 
 def query_command(args):
     """Handle query command."""
+    from slm_pipeline.agents.memory_agent import MemoryAgent
     agent = MemoryAgent()
     results = agent.search_memory(args.query, k=args.limit, video_id=args.video)
     
@@ -40,6 +38,7 @@ def query_command(args):
 
 def summarize_command(args):
     """Handle summarize command."""
+    from slm_pipeline.agents.summary_agent import SummaryAgent
     agent = SummaryAgent()
     
     if args.meeting:
@@ -73,6 +72,7 @@ def summarize_command(args):
 
 def tasks_command(args):
     """Handle tasks command."""
+    from slm_pipeline.agents.memory_agent import MemoryAgent
     agent = MemoryAgent()
     tasks = agent.get_all_tasks()
     
@@ -90,6 +90,7 @@ def tasks_command(args):
 
 def decisions_command(args):
     """Handle decisions command."""
+    from slm_pipeline.agents.memory_agent import MemoryAgent
     agent = MemoryAgent()
     decisions = agent.get_all_decisions()
     
@@ -107,6 +108,7 @@ def decisions_command(args):
 
 def topics_command(args):
     """Handle topics command."""
+    from slm_pipeline.agents.memory_agent import MemoryAgent
     agent = MemoryAgent()
     topics = agent.get_topics(k=args.limit)
     
@@ -140,6 +142,27 @@ def visual_index_command(args):
     from slm_pipeline.pipelines.vision_retrieval import CaptionOnlyRetriever
     count = CaptionOnlyRetriever().index_caption_file(args.captions)
     print(f"Indexed {count} timestamped model observations (caption-only retrieval).")
+
+
+def ask_command(args):
+    """Ask the local evidence layer without generating an ungrounded answer."""
+    from slm_pipeline.pipelines.evidence_query import EvidenceQueryService
+    from slm_pipeline.pipelines.vision_retrieval import CaptionOnlyRetriever
+
+    result = EvidenceQueryService(CaptionOnlyRetriever()).ask(
+        args.question, video_id=args.video, limit=args.limit,
+        start_sec=args.start_sec, end_sec=args.end_sec,
+    )
+    print(f"\nAnswer status: {result['answer_status']}")
+    print(result['answer'])
+    print("\nTimestamped evidence cards (distance ranks retrieval only; not confidence):")
+    for index, card in enumerate(result['evidence_cards'], 1):
+        interval = card['source_time_range_sec']
+        time_text = "unavailable" if interval is None else f"{interval[0]:.3f}s – {interval[1]:.3f}s"
+        print(f"\n[{index}] {card.get('video_id')} at {time_text}")
+        print(f"    Observation: {card.get('observation', '')}")
+        print(f"    Evidence status: {card.get('verification_status')}; accepted: {card.get('accepted_as_fact')}")
+        print(f"    Retrieval distance (ranking only): {card.get('retrieval_distance_ranking_only')}")
 
 
 def main():
@@ -180,6 +203,13 @@ def main():
 
     visual_index_parser = subparsers.add_parser('visual-index', help='Index Phase 4 model captions only')
     visual_index_parser.add_argument('--captions', required=True, help='Phase 4 vision_captions.json path')
+
+    ask_parser = subparsers.add_parser('ask', help='Retrieve timestamped evidence with a fail-closed answer status')
+    ask_parser.add_argument('question', type=str, help='Question to retrieve against local observations')
+    ask_parser.add_argument('--limit', type=int, default=5, help='Number of evidence cards (1-10)')
+    ask_parser.add_argument('--video', type=str, help='Filter evidence cards by source video ID')
+    ask_parser.add_argument('--start-sec', type=float, help='Optional inclusive source-time start; requires --end-sec')
+    ask_parser.add_argument('--end-sec', type=float, help='Optional inclusive source-time end; requires --start-sec')
     
     args = parser.parse_args()
     
@@ -202,6 +232,8 @@ def main():
         visual_search_command(args)
     elif args.command == 'visual-index':
         visual_index_command(args)
+    elif args.command == 'ask':
+        ask_command(args)
 
 
 if __name__ == "__main__":

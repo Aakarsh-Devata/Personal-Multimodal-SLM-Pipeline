@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SLM local evidence query</title>
+  <style>body{font:16px system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;color:#18212b}input,button{font:inherit;padding:.55rem;margin:.25rem 0}input[type=text]{width:100%;box-sizing:border-box}.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}.card{border:1px solid #ccd5df;border-radius:.5rem;padding:.9rem;margin:.7rem 0}.muted{color:#536273}</style>
+</head>
+<body>
+  <h1>Local evidence query</h1>
+  <p class="muted">Searches only the local MiniLM/FAISS index. Retrieval distance ranks results; it is not calibrated confidence. Raw model observations are not factual answers.</p>
+  <form id="ask-form">
+    <label>Question <input id="question" type="text" required maxlength="1000" placeholder="What might be happening?"></label>
+    <div class="grid">
+      <label>Source video (optional) <input id="video" type="text" placeholder="P02_05"></label>
+      <label>Top results <input id="limit" type="number" min="1" max="10" value="5"></label>
+      <span></span>
+    </div>
+    <button type="submit">Search local evidence</button>
+  </form>
+  <section id="result" aria-live="polite"></section>
+  <script>
+    const result = document.getElementById('result');
+    const add = (parent, tag, value, className='') => { const node=document.createElement(tag); node.textContent=value; if(className) node.className=className; parent.appendChild(node); return node; };
+    document.getElementById('ask-form').addEventListener('submit', async (event) => {
+      event.preventDefault(); result.replaceChildren();
+      const payload={question:document.getElementById('question').value,limit:Number(document.getElementById('limit').value)};
+      const video=document.getElementById('video').value.trim(); if(video) payload.video_id=video;
+      try {
+        const response=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const data=await response.json(); if(!response.ok) throw new Error(data.detail || 'Request failed');
+        add(result,'h2',data.answer_status); add(result,'p',data.answer);
+        for(const card of data.evidence_cards){const box=document.createElement('article'); box.className='card'; const time=card.source_time_range_sec ? card.source_time_range_sec.map(x=>x.toFixed(3)+'s').join(' – ') : 'timestamp unavailable'; add(box,'strong',`${card.video_id || 'unknown video'} · ${time}`); add(box,'p',card.observation || 'No observation text'); add(box,'p',`Evidence status: ${card.verification_status}; accepted as fact: ${card.accepted_as_fact}`,'muted'); add(box,'p',`Retrieval distance (ranking only): ${card.retrieval_distance_ranking_only ?? 'unavailable'}`,'muted'); result.appendChild(box);}
+      } catch(error) { add(result,'p',error.message); }
+    });
+  </script>
+</body></html>
