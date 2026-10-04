@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from config import config
-from agents.memory_agent import MemoryAgent
-from agents.summary_agent import SummaryAgent
+from slm_pipeline.config import config
+from slm_pipeline.agents.memory_agent import MemoryAgent
+from slm_pipeline.agents.summary_agent import SummaryAgent
 
 app = FastAPI(
     title="SLM Pipeline API",

@@ -1,0 +1,12 @@
+# Independent dense comparison profile; outputs go outside the sparse baseline.
+paths:
+  raw_dir: "data/raw"
+  processed_dir: "data/experiments/dense/processed"
+  memory_dir: "data/experiments/dense/memory"
+  embeddings_dir: "data/experiments/dense/embeddings"
+models:
+  vision:
+    device: "cpu"
+    max_new_tokens: 24
+pipeline:
+  frame_sampling_fps: 0.5

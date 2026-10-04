@@ -9,10 +9,10 @@ import argparse
 from pathlib import Path
 import json
 
-sys.path.insert(0, str(Path(__file__).parent))
-from config import config
-from agents.memory_agent import MemoryAgent
-from agents.summary_agent import SummaryAgent
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from slm_pipeline.config import config
+from slm_pipeline.agents.memory_agent import MemoryAgent
+from slm_pipeline.agents.summary_agent import SummaryAgent
 
 
 def query_command(args):
@@ -28,11 +28,12 @@ def query_command(args):
         print(f"    Time: {result.get('time_range', [0, 0])[0]:.1f}s - {result.get('time_range', [0, 0])[1]:.1f}s")
         print(f"    Speech: {result.get('speech_text', '')[:200]}")
         print(f"    Visual: {result.get('visual_caption', '')}")
+        print(f"    Evidence status: {result.get('verification_status', 'unvalidated_or_unknown')}")
         if result.get('topics'):
             print(f"    Topics: {', '.join(result.get('topics', []))}")
         if result.get('decisions'):
             print(f"    Decisions: {', '.join(result.get('decisions', []))}")
-        print(f"    Similarity: {result.get('similarity', 0):.3f}")
+        print(f"    Retrieval distance (ranking only): {result.get('distance', result.get('similarity', 0)):.3f}")
     
     print("\n" + "=" * 80)
 
@@ -118,6 +119,29 @@ def topics_command(args):
     print("\n" + "=" * 80)
 
 
+def visual_search_command(args):
+    """Search Phase 4 captions without claiming an ASR or semantic answer."""
+    from slm_pipeline.pipelines.vision_retrieval import CaptionOnlyRetriever
+    retriever = CaptionOnlyRetriever()
+    results = retriever.search(args.query, video_id=args.video, limit=args.limit)
+    print(f"\nCaption-only model observations for: '{args.query}'\n")
+    print("No ASR or semantic answer was generated; retrieved text is unvalidated model evidence.")
+    print("=" * 80)
+    for index, result in enumerate(results, 1):
+        timestamp = result.get("frame_timestamp_sec", 0.0)
+        print(f"\n[{index}] Video: {result.get('video_id')} at {timestamp:.3f}s")
+        print(f"    Observation: {result.get('observation', '')}")
+        print(f"    Retrieval distance: {result.get('distance', 0):.3f}")
+    print("\n" + "=" * 80)
+
+
+def visual_index_command(args):
+    """Index Phase 4 model captions only; no ASR, semantic, or labels input."""
+    from slm_pipeline.pipelines.vision_retrieval import CaptionOnlyRetriever
+    count = CaptionOnlyRetriever().index_caption_file(args.captions)
+    print(f"Indexed {count} timestamped model observations (caption-only retrieval).")
+
+
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -148,6 +172,14 @@ def main():
     # Topics command
     topics_parser = subparsers.add_parser('topics', help='List common topics')
     topics_parser.add_argument('--limit', type=int, default=20, help='Number of topics to show')
+
+    visual_parser = subparsers.add_parser('visual-search', help='Search timestamped model captions only')
+    visual_parser.add_argument('query', type=str, help='Text to retrieve against model observations')
+    visual_parser.add_argument('--limit', type=int, default=5, help='Number of observations')
+    visual_parser.add_argument('--video', type=str, help='Filter observations by video ID')
+
+    visual_index_parser = subparsers.add_parser('visual-index', help='Index Phase 4 model captions only')
+    visual_index_parser.add_argument('--captions', required=True, help='Phase 4 vision_captions.json path')
     
     args = parser.parse_args()
     
@@ -166,6 +198,10 @@ def main():
         decisions_command(args)
     elif args.command == 'topics':
         topics_command(args)
+    elif args.command == 'visual-search':
+        visual_search_command(args)
+    elif args.command == 'visual-index':
+        visual_index_command(args)
 
 
 if __name__ == "__main__":

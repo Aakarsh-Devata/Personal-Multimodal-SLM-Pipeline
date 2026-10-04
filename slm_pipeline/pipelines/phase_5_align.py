@@ -10,8 +10,9 @@ from pathlib import Path
 from typing import List, Dict, Any
 import logging
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from config import config
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from slm_pipeline.config import config
+from slm_pipeline.runtime import selected_video_dirs, phase_cli
 
 logging.basicConfig(
     level=config['logging']['level'],
@@ -40,7 +41,9 @@ class MultimodalAligner:
         window_end = end_time + self.time_window
         
         for frame in vision_data:
-            frame_time = frame.get('timestamp_sec', 0)
+            if frame.get('success') is False:
+                continue
+            frame_time = frame['timestamp_sec']
             if window_start <= frame_time <= window_end:
                 matching_frames.append(frame)
         
@@ -77,7 +80,17 @@ class MultimodalAligner:
         """Create context blocks by aligning speech and vision."""
         context_blocks = []
         
-        segments = transcript_data.get('segments', [])
+        segments = list(transcript_data.get('segments', []))
+        # Preserve visual evidence for silent inputs and frames outside speech.
+        for frame in vision_data:
+            if frame.get('success') is False:
+                continue
+            timestamp = float(frame['timestamp_sec'])
+            if not any(seg['start'] - self.time_window <= timestamp <= seg['end'] + self.time_window
+                       for seg in segments):
+                segments.append({'start': timestamp, 'end': timestamp, 'text': '',
+                                 'source_type': 'visual_only'})
+        segments.sort(key=lambda seg: (seg['start'], seg['end']))
         
         for idx, segment in enumerate(segments):
             start_time = segment.get('start', 0)
@@ -104,8 +117,31 @@ class MultimodalAligner:
                 "visual": {
                     "caption": visual_caption,
                     "frame_count": len(matching_frames),
-                    "frame_ids": [f.get('frame_id') for f in matching_frames]
+                    "frame_ids": [f.get('frame_id') for f in matching_frames],
+                    "frame_timestamps_sec": [f['timestamp_sec'] for f in matching_frames],
+                    "frames": [{key: f[key] for key in ('frame_id', 'timestamp_sec', 'source_timestamp_sec', 'source_path', 'source_type', 'model', 'backend', 'device') if key in f}
+                               for f in matching_frames],
+                    "model_observations": [{
+                        "source_type": "model",
+                        "raw_model_text": f.get("caption", ""),
+                        "source_pts_sec": [f.get("source_timestamp_sec", f["timestamp_sec"])],
+                        "frame_ids": [f.get("frame_id")],
+                        "frame_hashes": [f["frame_hash"]] if f.get("frame_hash") else [],
+                        # Retain known run/model identifiers when upstream starts
+                        # recording them; provenance is descriptive only and never
+                        # makes a model claim accepted evidence.
+                        "model_provenance": {key: f.get(key) for key in (
+                            "model", "backend", "device", "model_revision",
+                            "model_commit", "model_id", "run_id", "prompt_sha256",
+                            "input_trace_id",
+                        ) if f.get(key) is not None},
+                        "verification_status": "unvalidated_model_hypothesis",
+                        "accepted_as_fact": False,
+                    } for f in matching_frames if f.get("caption") and f.get("frame_id") and f.get("model") and f.get("backend")],
+                    "verification_status": "unvalidated_model_hypothesis" if matching_frames else "no_visual_observation",
+                    "accepted_as_fact": False,
                 },
+                "source_type": segment.get('source_type', transcript_data.get('source_type', 'model_transcript')),
                 "raw_transcript_segment_id": segment.get('id'),
                 "duration_sec": end_time - start_time
             }
@@ -121,14 +157,12 @@ class MultimodalAligner:
         # Load transcript
         transcript_file = video_dir / "transcript.json"
         if not transcript_file.exists():
-            logger.warning(f"No transcript found for {video_dir.name}")
-            return
+            raise FileNotFoundError(f"No transcript found for {video_dir.name}")
         
         # Load vision captions
         vision_file = video_dir / "vision_captions.json"
         if not vision_file.exists():
-            logger.warning(f"No vision captions found for {video_dir.name}")
-            return
+            raise FileNotFoundError(f"No vision captions found for {video_dir.name}")
         
         # Output file
         output_file = video_dir / "context_blocks.json"
@@ -166,30 +200,11 @@ class MultimodalAligner:
         logger.info(f"Saved to {output_file}")
 
 
-def main():
-    """Main entry point."""
-    processed_dir = Path(config['paths']['processed_dir'])
-    
-    if not processed_dir.exists():
-        logger.error(f"Processed directory not found: {processed_dir}")
-        return
-    
-    # Initialize aligner
+def main(video_id=None):
     aligner = MultimodalAligner()
-    
-    # Process all video folders
-    video_folders = [d for d in processed_dir.iterdir() if d.is_dir()]
-    logger.info(f"Found {len(video_folders)} video folders to process")
-    
-    for video_dir in video_folders:
-        try:
-            aligner.process_video_folder(video_dir)
-        except Exception as e:
-            logger.error(f"Failed to process {video_dir.name}: {e}")
-            continue
-    
-    logger.info("🎉 Phase 5 (Multimodal Alignment) completed!")
+    for video_dir in selected_video_dirs(config, video_id):
+        aligner.process_video_folder(video_dir)
 
 
 if __name__ == "__main__":
-    main()
+    phase_cli(main)

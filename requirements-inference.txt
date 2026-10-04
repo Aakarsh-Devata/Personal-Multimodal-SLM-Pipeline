@@ -1,0 +1,12 @@
+# Optional full inference profile. Not validated by the lightweight milestone.
+# Install a platform-appropriate PyTorch build first from https://pytorch.org/.
+-r requirements.txt
+torch>=2.6,<3
+torchvision>=0.24,<0.25
+transformers>=4.49,<5
+num2words>=0.5.14,<1
+sentence-transformers>=3.4,<4
+openai-whisper==20240930
+accelerate>=1.6,<2
+fastapi>=0.115,<1
+uvicorn>=0.34,<1

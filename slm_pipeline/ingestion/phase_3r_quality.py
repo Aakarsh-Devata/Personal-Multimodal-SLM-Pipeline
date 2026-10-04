@@ -27,8 +27,9 @@ from tqdm import tqdm
 # CONFIG
 # ----------------------
 import sys
-sys.path.insert(0, str(Path.cwd()))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from slm_pipeline.config import config
+from slm_pipeline.runtime import selected_video_dirs, phase_cli
 
 PROC_ROOT = Path(config['paths']['processed_dir'])
 
@@ -181,7 +182,9 @@ def process_video_folder(video_dir: Path):
         log(f"⚠ No candidate frames found in {scene_dir} or {fixed_dir} for {vid}. Skipping.")
         manifest["stats"] = {"usable": 0}
         (video_dir / MANIFEST_FN).write_text(json.dumps(manifest, indent=2))
-        return
+        raise ValueError(f"No candidate frames for {vid}")
+
+    timestamps = json.loads((video_dir / "frame_timestamps.json").read_text())["frames"]
 
     # process images in order
     hashes = []
@@ -189,6 +192,10 @@ def process_video_folder(video_dir: Path):
     excluded = {"blurry": [], "dark": [], "bright": [], "duplicates": []}
 
     for p in tqdm(candidates, desc=f"Processing frames for {vid}", unit="img"):
+        source_key = str(p.relative_to(video_dir))
+        if source_key not in timestamps:
+            raise ValueError(f"Missing source timestamp for {source_key}; rerun preprocessing")
+        timing = {**timestamps[source_key], "source_path": source_key}
         # safe-read image (cv2/PIL combo)
         try:
             img = read_image_cv(p)
@@ -248,7 +255,7 @@ def process_video_folder(video_dir: Path):
         if is_dup:
             if KEEP_DUPLICATES:
                 # keep but mark duplicate
-                kept.append({"path": str(p.name), "hash": str(h)})
+                kept.append({"path": str(p.relative_to(video_dir)), "hash": str(h), **timing})
                 hashes.append((h, p))
             else:
                 # skip adding to usable set
@@ -271,9 +278,9 @@ def process_video_folder(video_dir: Path):
                 except Exception as e:
                     # fallback: convert to RGB and save
                     img_proc.convert("RGB").save(dest_path, format="JPEG", quality=90)
-                kept.append({"path": str(dest_path.name), "orig": str(p.name), "hash": str(h)})
+                kept.append({"path": str(dest_path.relative_to(video_dir)), "orig": str(p.name), "hash": str(h), **timing})
             else:
-                kept.append({"path": str(p.name), "hash": str(h)})
+                kept.append({"path": str(p.relative_to(video_dir)), "hash": str(h), **timing})
 
     # finalize manifest
     manifest["usable_frames"] = kept
@@ -309,21 +316,10 @@ def process_video_folder(video_dir: Path):
     log(f"Done {vid}: usable={len(kept)} excluded={sum(len(v) for v in excluded.values())}")
 
 
-def main():
-    if not PROC_ROOT.exists():
-        log("ERROR: processed root not found:", PROC_ROOT)
-        sys.exit(1)
-    # process each processed/<video-id> folder
-    folders = sorted([p for p in PROC_ROOT.iterdir() if p.is_dir()])
-    if not folders:
-        log("No video folders found in processed/. Nothing to do.")
-        return
-
-    for folder in folders:
+def main(video_id=None):
+    for folder in selected_video_dirs(config, video_id):
         process_video_folder(folder)
-
-    log("\nPhase C3 complete. Manifests created for each processed video.")
 
 
 if __name__ == "__main__":
-    main()
+    phase_cli(main)
